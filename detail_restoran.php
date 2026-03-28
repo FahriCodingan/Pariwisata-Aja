@@ -46,7 +46,7 @@ if(!$row){
     exit;
 }
 
-// Query ulasan dari database
+// Query ulasan preview (3 terbaru) untuk tampilan utama
 $queryUlasan = mysqli_query($conn, "
 SELECT rating.*, users.username
 FROM rating
@@ -55,6 +55,19 @@ WHERE rating.id_restoran = $id
 ORDER BY rating.id DESC
 LIMIT 3
 ");
+
+// Query SEMUA ulasan untuk modal (tanpa limit)
+$querySemuaUlasan = mysqli_query($conn, "
+SELECT rating.*, users.username
+FROM rating
+LEFT JOIN users ON users.id_user = rating.id_user
+WHERE rating.id_restoran = $id
+ORDER BY rating.id DESC
+");
+$semuaUlasan = [];
+while($u = mysqli_fetch_assoc($querySemuaUlasan)){
+    $semuaUlasan[] = $u;
+}
 
 // Query distribusi bintang
 $queryBars = mysqli_query($conn, "
@@ -72,7 +85,6 @@ $totalReview = array_sum($barsData);
 // ── Proses kirim rating (hanya jika sudah login) ──
 if(isset($_POST['kirim_rating'])){
     if(!isset($_SESSION['login'])){
-        // Kalau belum login, redirect ke login
         header("Location: login.php?redirect=detail_restoran.php?id=$id");
         exit;
     }
@@ -125,7 +137,6 @@ $sudahLogin = isset($_SESSION['login']);
         color: var(--text);
     }
 
-    /* Header */
     header {
         background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
         padding: 1.5rem 0;
@@ -153,18 +164,16 @@ $sudahLogin = isset($_SESSION['login']);
         justify-content: center;
         font-size: 1.5rem;
         color: #ff6b35;
-        font-weight: bold;
     }
 
-    /* Button Login Dan Register */
     .btn-login {
         background: white;
         color: #ff6b35;
         border-radius: 25px;
-        padding: 0.6rem 1.5rem;
+        padding: .6rem 1.5rem;
         font-weight: 600;
         border: 2px solid #ff6b35;
-        transition: 0.3s;
+        transition: .3s;
     }
 
     .btn-login:hover {
@@ -177,9 +186,9 @@ $sudahLogin = isset($_SESSION['login']);
         color: white;
         border: 2px solid white;
         border-radius: 25px;
-        padding: 0.6rem 1.5rem;
+        padding: .6rem 1.5rem;
         font-weight: 600;
-        transition: 0.3s;
+        transition: .3s;
     }
 
     .btn-register:hover {
@@ -187,17 +196,16 @@ $sudahLogin = isset($_SESSION['login']);
         color: #ff6b35;
     }
 
-    /* Search Box */
     .search-box {
         position: relative;
     }
 
     .search-box input {
-        padding: 0.8rem 3rem 0.8rem 1.2rem;
+        padding: .8rem 3rem .8rem 1.2rem;
         border: none;
         border-radius: 25px;
         font-size: 1rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
     }
 
     .search-icon {
@@ -209,10 +217,9 @@ $sudahLogin = isset($_SESSION['login']);
         font-size: 1.2rem;
     }
 
-    /* Navigasi Bar */
     nav {
         background: #fff;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
     }
 
     .nav-container a {
@@ -221,7 +228,7 @@ $sudahLogin = isset($_SESSION['login']);
         font-weight: 500;
         padding: 1.2rem 2.5rem;
         border-bottom: 3px solid transparent;
-        transition: all 0.3s;
+        transition: all .3s;
     }
 
     .nav-container a:hover,
@@ -379,6 +386,85 @@ $sudahLogin = isset($_SESSION['login']);
         border-color: var(--orange);
         box-shadow: 0 0 0 3px rgba(244, 123, 32, .12);
     }
+
+    /* ── Filter bintang di modal semua ulasan ── */
+    .filter-bintang {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .filter-bintang button {
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1.5px solid var(--border);
+        background: #fff;
+        font-size: .8rem;
+        font-weight: 500;
+        color: var(--muted);
+        cursor: pointer;
+        transition: all .2s;
+    }
+
+    .filter-bintang button:hover {
+        border-color: var(--orange);
+        color: var(--orange);
+    }
+
+    .filter-bintang button.active {
+        background: var(--orange);
+        border-color: var(--orange);
+        color: #fff;
+    }
+
+    .filter-bintang button.active-star {
+        background: #F59E0B;
+        border-color: #F59E0B;
+        color: #fff;
+    }
+
+    /* Scroll area ulasan di modal */
+    .ulasan-scroll {
+        max-height: 420px;
+        overflow-y: auto;
+    }
+
+    .ulasan-scroll::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .ulasan-scroll::-webkit-scrollbar-track {
+        background: var(--cream);
+        border-radius: 4px;
+    }
+
+    .ulasan-scroll::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+    }
+
+    /* Tombol lihat semua */
+    .btn-lihat-semua {
+        background: transparent;
+        color: var(--orange);
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        font-size: .85rem;
+        font-weight: 500;
+        padding: 8px 20px;
+        transition: all .2s;
+    }
+
+    .btn-lihat-semua:hover {
+        background: var(--cream);
+        border-color: var(--orange);
+    }
+
+    /* Kosong state */
+    .empty-ulasan {
+        color: var(--muted);
+        font-size: .875rem;
+    }
     </style>
 </head>
 
@@ -386,7 +472,6 @@ $sudahLogin = isset($_SESSION['login']);
 
     <!-- Header -->
     <?php include 'header.php'; ?>
-
 
     <!-- Navigasi -->
     <nav>
@@ -400,6 +485,7 @@ $sudahLogin = isset($_SESSION['login']);
         </div>
     </nav>
 
+    <!-- Breadcrumb -->
     <div class="container py-3">
         <div aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
@@ -410,7 +496,7 @@ $sudahLogin = isset($_SESSION['login']);
         </div>
     </div>
 
-    <!-- Alert sukses rating -->
+    <!-- Alert ketika udah berhasil kirim ulasan -->
     <?php if(isset($_GET['rated'])): ?>
     <div class="container mb-2">
         <div class="alert alert-success d-flex align-items-center gap-2 py-2"
@@ -425,7 +511,6 @@ $sudahLogin = isset($_SESSION['login']);
 
             <!-- KOLOM KIRI -->
             <div class="col-lg-7">
-
                 <img src="assets/<?= htmlspecialchars($row['gambar']) ?>" alt="<?= htmlspecialchars($row['nama']) ?>"
                     class="foto-restoran mb-4" />
 
@@ -457,23 +542,19 @@ $sudahLogin = isset($_SESSION['login']);
                 </div>
 
                 <div class="d-flex gap-2">
-                    <!-- ── Tombol Rating: beda tampilan tergantung login ── -->
                     <?php if($sudahLogin): ?>
-                    <!-- Sudah login → buka modal seperti biasa -->
                     <button class="btn btn-rating px-4 py-2 d-flex align-items-center gap-2" data-bs-toggle="modal"
                         data-bs-target="#modalRating">
                         <i class="bi bi-star-fill"></i> Beri Rating
                     </button>
                     <?php else: ?>
-                    <!-- Belum login → tombol buka modal peringatan -->
                     <button class="btn btn-rating px-4 py-2 d-flex align-items-center gap-2" data-bs-toggle="modal"
                         data-bs-target="#modalLoginDulu">
                         <i class="bi bi-star-fill"></i> Beri Rating
                     </button>
                     <?php endif; ?>
-                    <a href="restaurant.php" style="text-decoration: none;">
-                        <button style="background: white;color: var(--orange);
-                            border: 1px solid var(--orange);"
+                    <a href="restaurant.php" style="text-decoration:none;">
+                        <button style="background:white;color:var(--orange);border:1px solid var(--orange);"
                             class="btn btn-rating px-4 py-2 d-flex align-items-center gap-2">
                             <i class="bi bi-arrow-bar-left"></i> Kembali
                         </button>
@@ -483,7 +564,6 @@ $sudahLogin = isset($_SESSION['login']);
 
             <!-- KOLOM KANAN -->
             <div class="col-lg-5">
-
                 <h5 class="section-title mb-3">Ulasan Pengunjung</h5>
 
                 <!-- Ringkasan bintang -->
@@ -520,8 +600,8 @@ $sudahLogin = isset($_SESSION['login']);
                     </div>
                 </div>
 
-                <!-- Daftar ulasan dari database -->
-                <div class="d-flex flex-column gap-3">
+                <!-- Preview 3 ulasan terbaru -->
+                <div class="d-flex flex-column gap-3 mb-3">
                     <?php if(mysqli_num_rows($queryUlasan) > 0): ?>
                     <?php while($ulasan = mysqli_fetch_assoc($queryUlasan)): ?>
                     <div class="card-ulasan p-3">
@@ -552,16 +632,123 @@ $sudahLogin = isset($_SESSION['login']);
                     <?php endif; ?>
                 </div>
 
+                <!-- Tombol Lihat Semua Ulasan -->
+                <?php if($totalReview > 0): ?>
+                <div class="text-center">
+                    <button class="btn-lihat-semua d-inline-flex align-items-center gap-2" data-bs-toggle="modal"
+                        data-bs-target="#modalSemuaUlasan">
+                        <i class="bi bi-chat-square-text"></i>
+                        Lihat Semua <?= $totalReview ?> Ulasan
+                    </button>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     </main>
 
-    <!-- MODAL RATING (hanya muncul kalau sudah login) -->
+    <!-- ============================================================ -->
+    <!-- MODAL SEMUA ULASAN + FILTER BINTANG                         -->
+    <!-- ============================================================ -->
+    <div class="modal fade" id="modalSemuaUlasan" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content" style="border-radius:16px;border:1px solid var(--border)">
+
+                <div class="modal-header px-4 pt-4">
+                    <div>
+                        <h5 class="modal-title fw-semibold mb-1"
+                            style="font-family:'Playfair Display',serif;color:var(--brown)">
+                            <i class="bi bi-chat-square-text me-2" style="color:var(--orange)"></i>
+                            Semua Ulasan
+                        </h5>
+                        <p class="mb-0" style="font-size:.8rem;color:var(--muted)">
+                            <?= htmlspecialchars($row['nama']) ?> · <?= $totalReview ?> ulasan
+                        </p>
+                    </div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body px-4 py-3">
+
+                    <!-- Filter bintang -->
+                    <div class="filter-bintang mb-3">
+                        <button class="active" onclick="filterUlasan(0, this)">Semua</button>
+                        <button onclick="filterUlasan(5, this)"><i class="bi bi-star-fill" style="color:#F59E0B"></i>
+                            5</button>
+                        <button onclick="filterUlasan(4, this)"><i class="bi bi-star-fill" style="color:#F59E0B"></i>
+                            4</button>
+                        <button onclick="filterUlasan(3, this)"><i class="bi bi-star-fill" style="color:#F59E0B"></i>
+                            3</button>
+                        <button onclick="filterUlasan(2, this)"><i class="bi bi-star-fill" style="color:#F59E0B"></i>
+                            2</button>
+                        <button onclick="filterUlasan(1, this)"><i class="bi bi-star-fill" style="color:#F59E0B"></i>
+                            1</button>
+                    </div>
+
+                    <!-- Counter hasil filter -->
+                    <p id="filterInfo" class="mb-3" style="font-size:.8rem;color:var(--muted)">
+                        Menampilkan <span id="filterCount"><?= $totalReview ?></span> ulasan
+                    </p>
+
+                    <!-- Daftar semua ulasan (scrollable) -->
+                    <div class="ulasan-scroll d-flex flex-column gap-3" id="listSemuaUlasan">
+                        <?php foreach($semuaUlasan as $u): ?>
+                        <!-- data-rating dipakai JavaScript untuk filter -->
+                        <div class="card-ulasan p-3" data-rating="<?= $u['rating'] ?>">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="nama-reviewer">
+                                    <i class="bi bi-person-circle me-1" style="color:var(--orange)"></i>
+                                    <?= htmlspecialchars($u['username'] ?? 'Anonim') ?>
+                                </span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <!-- Badge rating angka -->
+                                    <span
+                                        style="background:#F59E0B;color:#fff;border-radius:20px;font-size:.75rem;padding:2px 8px;font-weight:600">
+                                        <i class="bi bi-star-fill"></i> <?= $u['rating'] ?>
+                                    </span>
+                                    <span class="tgl-review">
+                                        <?= isset($u['created_at']) ? date('d M Y', strtotime($u['created_at'])) : '' ?>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="bintang-kecil mb-2">
+                                <?php for($i = 1; $i <= 5; $i++): ?>
+                                <i class="bi <?= $i <= $u['rating'] ? 'bi-star-fill' : 'bi-star' ?>"></i>
+                                <?php endfor; ?>
+                            </div>
+                            <?php if(!empty($u['ulasan'])): ?>
+                            <p class="teks-ulasan mb-0"><?= htmlspecialchars($u['ulasan']) ?></p>
+                            <?php else: ?>
+                            <p class="mb-0" style="font-size:.8rem;color:var(--muted);font-style:italic">Tidak ada teks
+                                ulasan</p>
+                            <?php endif; ?>
+                        </div>
+                        <?php endforeach; ?>
+
+                        <!-- Pesan kalau hasil filter kosong -->
+                        <div id="emptyFilter" class="text-center py-4 empty-ulasan" style="display:none">
+                            <i class="bi bi-star" style="font-size:2rem;opacity:.3"></i>
+                            <p class="mt-2 mb-0">Tidak ada ulasan dengan bintang ini.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer px-4 pb-4">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal"
+                        style="border-radius:10px;border:1.5px solid var(--border);font-size:.9rem">
+                        Tutup
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL BERI RATING (hanya kalau sudah login) -->
     <?php if($sudahLogin): ?>
     <div class="modal fade" id="modalRating" tabindex="-1" aria-labelledby="modalRatingLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius:16px;border:1px solid var(--border)">
-
                 <div class="modal-header px-4 pt-4">
                     <h5 class="modal-title fw-semibold" id="modalRatingLabel"
                         style="font-family:'Playfair Display',serif;color:var(--brown)">
@@ -569,14 +756,12 @@ $sudahLogin = isset($_SESSION['login']);
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
                 <form method="POST">
                     <div class="modal-body px-4 py-3">
                         <p class="mb-3" style="font-size:.875rem;color:var(--muted)">
                             Bagaimana pengalaman kamu di <strong
                                 style="color:var(--brown)"><?= htmlspecialchars($row['nama']) ?></strong>?
                         </p>
-
                         <div class="mb-3 text-center">
                             <label class="form-label d-block mb-2">Pilih Rating</label>
                             <div class="star-input">
@@ -593,7 +778,6 @@ $sudahLogin = isset($_SESSION['login']);
                             </div>
                             <small id="ratingLabel" style="color:var(--muted);font-size:.8rem">Belum dipilih</small>
                         </div>
-
                         <div class="mb-1">
                             <label class="form-label">Ulasan <span
                                     style="color:var(--muted);font-weight:400">(opsional)</span></label>
@@ -602,24 +786,20 @@ $sudahLogin = isset($_SESSION['login']);
                                 style="border-radius:10px;border:1.5px solid var(--border);font-size:.875rem"></textarea>
                         </div>
                     </div>
-
                     <div class="modal-footer px-4 pb-4 gap-2">
                         <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal"
-                            style="border-radius:10px;border:1.5px solid var(--border);font-size:.9rem">
-                            Batal
-                        </button>
+                            style="border-radius:10px;border:1.5px solid var(--border);font-size:.9rem">Batal</button>
                         <button type="submit" name="kirim_rating" class="btn btn-rating px-4 py-2">
                             <i class="bi bi-send-fill me-1"></i> Kirim Rating
                         </button>
                     </div>
                 </form>
-
             </div>
         </div>
     </div>
     <?php endif; ?>
 
-    <!-- ── MODAL PERINGATAN BELUM LOGIN ── -->
+    <!-- MODAL PERINGATAN BELUM LOGIN -->
     <?php if(!$sudahLogin): ?>
     <div class="modal fade" id="modalLoginDulu" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" style="max-width:380px">
@@ -656,6 +836,7 @@ $sudahLogin = isset($_SESSION['login']);
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+    // Label teks rating bintang
     const labelTeks = {
         1: 'Sangat Buruk 😞',
         2: 'Buruk 😕',
@@ -669,6 +850,38 @@ $sudahLogin = isset($_SESSION['login']);
             document.getElementById('ratingLabel').style.color = 'var(--orange)';
         });
     });
+
+    // ── Filter ulasan berdasarkan bintang ──
+    function filterUlasan(bintang, btn) {
+
+        // Update tombol aktif
+        document.querySelectorAll('.filter-bintang button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Ambil semua card ulasan
+        const cards = document.querySelectorAll('#listSemuaUlasan .card-ulasan');
+        let tampil = 0;
+
+        cards.forEach(card => {
+            // Ambil nilai rating dari atribut data-rating
+            const rating = parseInt(card.getAttribute('data-rating'));
+
+            if (bintang === 0 || rating === bintang) {
+                // Tampilkan kalau cocok atau filter "Semua"
+                card.style.display = '';
+                tampil++;
+            } else {
+                // Sembunyikan kalau tidak cocok
+                card.style.display = 'none';
+            }
+        });
+
+        // Update counter
+        document.getElementById('filterCount').textContent = tampil;
+
+        // Tampilkan pesan kosong kalau tidak ada hasil
+        document.getElementById('emptyFilter').style.display = tampil === 0 ? '' : 'none';
+    }
     </script>
 
 </body>

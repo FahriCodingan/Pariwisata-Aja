@@ -15,7 +15,10 @@ include 'config/koneksi.php';
 <body>
     <input type="text" placeholder="Nama Restaurant" name="nama">
     <input type="text" placeholder="Lokasi Restaurant" name="lokasi">
-
+    <input type="text" placeholder="Deksripsi Restaurant" name="deskripsi">
+    <input type="text" placeholder="Gambar Restaurant" name="gambar">
+    <input type="text" placeholder="Kategori Restaurant" name="kategori">
+    <input type="text">
 </body>
 
 </html>

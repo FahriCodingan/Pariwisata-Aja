@@ -478,7 +478,7 @@ while($row = mysqli_fetch_assoc($query)){
               <!-- Tags -->
               <div class="d-flex flex-wrap gap-3 mb-3">
                 <span class="tag-item"><i class="bi bi-tag-fill me-1"></i>${r.kategori}</span>
-                <span class="tag-item"><i class="bi bi-cash me-1"></i>Rp ${Number(r.harga).toLocaleString('id-ID')}</span>
+                <span class="tag-item"><i class="bi bi-cash me-1"></i>Rp ${Number(r.harga).toLocaleString('id-ID')} - Rp ${Number(r.max_harga).toLocaleString('id-ID')}</span>
               </div>
 
               <!-- Deskripsi -->
@@ -532,7 +532,7 @@ while($row = mysqli_fetch_assoc($query)){
             r.nama.toLowerCase().includes(term) ||
             r.deskripsi.toLowerCase().includes(term) ||
             r.kategori.toLowerCase().includes(term) ||
-            r.lokasi.toLowerCase().includes(term)
+            r.nama_lokasi.toLowerCase().includes(term)
         );
         renderRestaurants(filtered);
     });
@@ -546,9 +546,11 @@ while($row = mysqli_fetch_assoc($query)){
                 break;
             case 'price-low':
                 sorted.sort((a, b) => a.harga - b.harga);
+                sorted.sort((a, b) => a.max_harga - b.max_harga);
                 break;
             case 'price-high':
                 sorted.sort((a, b) => b.harga - a.harga);
+                sorted.sort((a, b) => b.max_harga - a.max_harga);
                 break;
             case 'name':
                 sorted.sort((a, b) => a.nama.localeCompare(b.nama));

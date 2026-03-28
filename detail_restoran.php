@@ -529,7 +529,8 @@ $sudahLogin = isset($_SESSION['login']);
                     <span class="info-item"><i
                             class="bi bi-tag-fill me-1"></i><?= htmlspecialchars($row['kategori']) ?></span>
                     <span class="info-item"><i class="bi bi-currency-dollar me-1"></i>Rp
-                        <?= number_format($row['harga'], 0, ',', '.') ?></span>
+                        <?= number_format($row['harga'], 0, ',', '.') ?> hingga Rp
+                        <?= number_format($row['max_harga'], 0, ',', '.') ?></span>
                     <span class="info-item"><i class="bi bi-clock-fill me-1"></i><?= $row['jam_buka'] ?> –
                         <?= $row['jam_tutup'] ?></span>
                 </div>

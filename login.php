@@ -24,7 +24,7 @@ if(isset($_POST['login'])) {
 
         $user = mysqli_fetch_assoc($result);
 
-        // Cek password langsung (tanpa hash)
+        // Validasi Password
         if($password === $user['password']) {
 
             // Simpan session

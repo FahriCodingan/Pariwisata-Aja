@@ -370,7 +370,6 @@ while($row = mysqli_fetch_assoc($query)){
                 <a href="restaurant.php" class="active">Restoran</a>
                 <!-- <a href="#">Kategori</a> -->
                 <a href="#">Tentang</a>
-                <a href="#">Kontak</a>
             </div>
         </div>
     </nav>

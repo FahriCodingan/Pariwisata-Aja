@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'config/koneksi.php';
+include '../config/koneksi.php';
 
 if(isset($_POST['username']) && isset($_POST['password'])) {
     $username = $_POST['username'];

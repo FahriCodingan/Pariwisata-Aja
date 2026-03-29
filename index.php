@@ -156,7 +156,6 @@ if(!$query){
                 <a href="#" class="active">Beranda</a>
                 <a href="restaurant.php">Restoran</a>
                 <a href="#">Tentang</a>
-                <a href="#">Kontak</a>
             </div>
         </div>
     </nav>

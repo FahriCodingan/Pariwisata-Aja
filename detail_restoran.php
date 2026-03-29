@@ -480,7 +480,6 @@ $sudahLogin = isset($_SESSION['login']);
                 <a href="index.php">Beranda</a>
                 <a href="restaurant.php" class="active">Restoran</a>
                 <a href="#">Tentang</a>
-                <a href="#">Kontak</a>
             </div>
         </div>
     </nav>

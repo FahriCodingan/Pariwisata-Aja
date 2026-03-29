@@ -3,13 +3,13 @@ session_start();
 include "config/koneksi.php";
 
 // Cek login
-if(!isset($_SESSION['login'])) {
+if(!isset($_SESSION['id_user'])) {
     header("Location: login.php");
     exit;
 }
 
 // Ambil data user dari database
-$id = $_SESSION['login'];
+$id = $_SESSION['id_user'];
 
 $query = mysqli_query($conn, "SELECT * FROM users WHERE id_user = $id");
 $user = mysqli_fetch_assoc($query);
